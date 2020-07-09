@@ -5,6 +5,7 @@ from Enemy import EnemyWave
 import neat
 import os
 import time
+import pickle
 pygame.font.init()
 
 
@@ -157,6 +158,8 @@ def run(config_path):
     p.add_reporter(stats)
 
     winner = p.run(main, 50)
+    with open("winner.data", "wb") as data_update:
+        pickle.dump(winner, data_update)
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)
