@@ -5,20 +5,23 @@ from Enemy import EnemyWave
 import neat
 import os
 import time
+pygame.font.init()
 
-pygame.init()
+
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 500
 BACKGROUND = back = pygame.image.load("images/back.jpg")
+generation = 0
 
-def draw_screen(screen, score, highscore):
-    screen.fill((0,0,0))
-    screen.blit(BACKGROUND,(0,0))
-    font = pygame.font.SysFont("comicsans", 40)
-    showscore = font.render(f"Score: {score}", True, (255, 255, 255))
+def draw_screen(screen, score, highscore, alive, gen):
+    font = pygame.font.SysFont("comicsans", 30)
+    showscore = font.render(f"Max Score: {score}", True, (255, 255, 255))
     screen.blit(showscore,(SCREEN_WIDTH - 10 - showscore.get_width(), 10))              
     showscore = font.render(f"High Score: {highscore}", True, (255, 255, 255))
-    screen.blit(showscore,(10, 10))
+    showscore = font.render(f"Alive: {alive}", True, (255, 255, 255))
+    screen.blit(showscore,(10, 450))
+    showscore = font.render(f"Generation: {gen}", True, (255, 255, 255))
+    screen.blit(showscore,(10, 475))
 
 def main(genomes, config):
     # create our screen
@@ -32,14 +35,13 @@ def main(genomes, config):
     except:
         highscore = 0
 
-    
-
-    score = 0
-    running = True
-
-    
+    run = True
     clock = pygame.time.Clock()
 
+    global generation 
+    generation += 1
+
+    scores = []
     nets = []
     ge = []
     spaceships = []
@@ -49,41 +51,100 @@ def main(genomes, config):
     for _, g in genomes:
         net = neat.nn.FeedForwardNetwork.create(g, config)
         nets.append(net)
-        spaceships.append(Spaceship())
+        currentShip = Spaceship()
+        spaceships.append(currentShip)
         bullets.append(Bullet())
-        enemy_waves.append(EnemyWave(5, spaceships[_-1]))
+        enemy_waves.append(EnemyWave(5, currentShip))
+        scores.append(0)
         g.fitness = 0
         ge.append(g)
     
 
-    while running:
-        draw_screen(screen, score, highscore)
+    while run:
+        screen.fill((0,0,0))
+        screen.blit(BACKGROUND,(0,0))   
         dt = clock.tick(60)
         speed = 1 / float(dt)
 
-        for spaceship in spaceships:
-            spaceship.move(screen)
 
-        pygame.display.update()
-        time.sleep(5)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running=False
-            spaceship.check_move(event, speed)
-            bullet.check_move(event, spaceship.x, spaceship.y)
+                run = False
+                pygame.quit()
+                quit()
 
-        result = enemy_wave.check(screen, bullet, spaceship, speed)
-        if result >= 0:
-            score += result
-        else:
-            running = False
-            if score > int(highscore):
-                f=open("highscore.txt", "w")
-                f.write(str(score))
-                f.close()
+        for i, spaceship in enumerate(spaceships):
+            output = nets[i].activate((
+                spaceship.x, spaceship.y, 
+                bullets[i].shoot,
+                enemy_waves[i].enemy_list[0].x, enemy_waves[i].enemy_list[0].y,
+                enemy_waves[i].enemy_list[1].x, enemy_waves[i].enemy_list[1].y,
+                enemy_waves[i].enemy_list[2].x, enemy_waves[i].enemy_list[2].y,
+                enemy_waves[i].enemy_list[3].x, enemy_waves[i].enemy_list[3].y,
+                enemy_waves[i].enemy_list[4].x, enemy_waves[i].enemy_list[4].y
+            ))
+            #print(output)
 
+            # Should we shoot?
+            if output[4] > .5:
+                if not bullets[i].shoot:
+                    bullets[i].x = spaceship.x + 32 - (bullets[i].img.get_rect().size[0] / 2 )
+                    bullets[i].y = spaceship.y - bullets[i].img.get_rect().size[1]
+                    bullets[i].shoot = True
+
+            # Should we move up or down or neither?
+            if output[0] > 0 or output[1] > 0:
+                # Which is bigger?
+                if output[0] > output[1]:
+                
+                    # move up
+                    spaceship.move_y -= spaceship.vel * speed
+                
+                else:
+                    spaceship.move_y += spaceship.vel * speed
+
+
+            # Should we move left or right or neither?
+            if output[2] > 0 or output[3] > 0:
+                # Which is bigger?
+                if output[2] > output[3]:
+                
+                    # move left
+                    spaceship.move_x -= spaceship.vel * speed
+                
+                else:
+                    spaceship.move_x += spaceship.vel * speed
+
+            #spaceship.check_move(event, speed)
+            #bullets[i].check_move(event, spaceship.x, spaceship.y)
+            ge[i].fitness += .01
+            spaceship.move(screen)
+            spaceship.move_x = 0
+            spaceship.move_y = 0
+
+            result = enemy_waves[i].check(screen, bullets[i], spaceship, speed)
+            if result >= 0:
+                scores[i] += result
+                ge[i].fitness += result * 5
+            else:
+                # run = False
+                # if score > int(highscore):
+                #     f=open("highscore.txt", "w")
+                #     f.write(str(score))
+                #     f.close()
+                ge[i].fitness -= 5
+                spaceships.pop(i)
+                enemy_waves.pop(i)
+                bullets.pop(i)
+                nets.pop(i)
+                ge.pop(i)
+        draw_screen(screen, max(scores), highscore, len(spaceships), generation)
         pygame.display.update()
-    pygame.quit()
+        if len(spaceships) == 0:
+            print(f"Max Score {generation}: {max(scores)}")
+            run = False
+            break
+    #pygame.quit()
 
 def run(config_path):
     config = neat.config.Config(neat.DefaultGenome, neat.DefaultReproduction,

@@ -1,5 +1,5 @@
 import pygame
-from pygame import mixer
+#from pygame import mixer
 
 class Bullet():
 
@@ -9,7 +9,7 @@ class Bullet():
         self.shoot = False
         self.img = pygame.image.load("images/laser.png")
         self.image_mask = pygame.mask.from_surface(self.img)
-        self.laser = mixer.Sound("sounds/laser.wav")
+        #self.laser = mixer.Sound("sounds/laser.wav")
 
     def sound(self):
         pass

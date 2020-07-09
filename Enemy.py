@@ -40,8 +40,8 @@ class EnemyWave():
             if bullet.shoot:
                 if hit_pixel(bullet, enemy):
                     bullet.shoot = False
-                    contact = mixer.Sound("sounds/explosion.wav")
-                    contact.set_volume(.5)
+                    #contact = mixer.Sound("sounds/explosion.wav")
+                    #contact.set_volume(.5)
                     # Killing the sound
                     #contact.play()
                     score_tracker += 1
@@ -50,7 +50,7 @@ class EnemyWave():
                 bullet.move(screen)
 
             if hit_pixel(enemy, spaceship):
-                print(f'PLoss ---- \nSpaceship: {spaceship.x}, {spaceship.y} \nEnemy: {enemy.x},{enemy.y}')
+                #print(f'PLoss ---- \nSpaceship: {spaceship.x}, {spaceship.y} \nEnemy: {enemy.x},{enemy.y}')
                 return -1
 
         return score_tracker
