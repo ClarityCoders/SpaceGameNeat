@@ -29,7 +29,7 @@ class EnemyWave():
     def check(self, screen, bullet, spaceship, speed):
         score_tracker = 0
         for enemy in self.enemy_list:
-            screen.blit(enemy.img, (int(enemy.x), int(enemy.y)))
+            #screen.blit(enemy.img, (int(enemy.x), int(enemy.y)))
             if enemy.x > 500 - enemy.img.get_rect().size[0] or enemy.x <= 0:
                 enemy.velx *= -1  
             enemy.x += enemy.velx * speed

@@ -4,7 +4,6 @@ from Bullet import Bullet
 from Enemy import EnemyWave
 import neat
 import os
-import time
 import pickle
 pygame.font.init()
 
@@ -62,8 +61,8 @@ def main(genomes, config):
     
 
     while run:
-        screen.fill((0,0,0))
-        screen.blit(BACKGROUND,(0,0))   
+        #screen.fill((0,0,0))
+        #screen.blit(BACKGROUND,(0,0))   
         dt = clock.tick(60)
         speed = 1 / float(dt)
 
@@ -139,8 +138,8 @@ def main(genomes, config):
                 bullets.pop(i)
                 nets.pop(i)
                 ge.pop(i)
-        draw_screen(screen, max(scores), highscore, len(spaceships), generation)
-        pygame.display.update()
+        #draw_screen(screen, max(scores), highscore, len(spaceships), generation)
+        #pygame.display.update()
         if len(spaceships) == 0:
             print(f"Max Score {generation}: {max(scores)}")
             run = False
@@ -154,12 +153,14 @@ def run(config_path):
 
     p = neat.Population(config)
     p.add_reporter(neat.StdOutReporter(True))
+    p.add_reporter(neat.Checkpointer(10))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
-    winner = p.run(main, 50)
+    winner = p.run(main, 1000)
+    print(f"\nBest genome:\n{winner}")
     with open("winner.data", "wb") as data_update:
-        pickle.dump(winner, data_update)
+            pickle.dump(winner, data_update)
 
 if __name__ == "__main__":
     local_dir = os.path.dirname(__file__)

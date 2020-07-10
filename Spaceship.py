@@ -34,4 +34,4 @@ class Spaceship():
             self.x += self.move_x
         if self.y + self.move_y < height_bound and self.y + self.move_y > 0:
             self.y += self.move_y
-        screen.blit(self.img,(int(self.x),int(self.y)))
+        #screen.blit(self.img,(int(self.x),int(self.y)))

@@ -30,4 +30,4 @@ class Bullet():
                 self.y = -100
         else:
             self.y -= .75
-            screen.blit(self.img,(self.x, self.y))
+            #screen.blit(self.img,(self.x, self.y))
