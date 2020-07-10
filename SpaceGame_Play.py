@@ -117,7 +117,7 @@ def main(genomes, config):
 
             #spaceship.check_move(event, speed)
             #bullets[i].check_move(event, spaceship.x, spaceship.y)
-            ge[i].fitness += .01
+            ge[i].fitness += .5
             spaceship.move(screen)
             spaceship.move_x = 0
             spaceship.move_y = 0
@@ -153,7 +153,7 @@ def run(config_path):
 
     p = neat.Population(config)
     p.add_reporter(neat.StdOutReporter(True))
-    p.add_reporter(neat.Checkpointer(10))
+    p.add_reporter(neat.Checkpointer(50))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 

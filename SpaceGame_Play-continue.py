@@ -59,13 +59,12 @@ def main(genomes, config):
         g.fitness = 0
         ge.append(g)
     
-
+    max_score = 0
     while run:
         #screen.fill((0,0,0))
         #screen.blit(BACKGROUND,(0,0))   
         dt = clock.tick(60)
         speed = 1 / float(dt)
-
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -117,7 +116,7 @@ def main(genomes, config):
 
             #spaceship.check_move(event, speed)
             #bullets[i].check_move(event, spaceship.x, spaceship.y)
-            ge[i].fitness += .01
+            ge[i].fitness += .5
             spaceship.move(screen)
             spaceship.move_x = 0
             spaceship.move_y = 0
@@ -137,13 +136,16 @@ def main(genomes, config):
                 enemy_waves.pop(i)
                 bullets.pop(i)
                 nets.pop(i)
+                scores.pop(i)
                 ge.pop(i)
-        #draw_screen(screen, max(scores), highscore, len(spaceships), generation)
+        #draw_screen(screen, max_score, highscore, len(spaceships), generation)
         #pygame.display.update()
         if len(spaceships) == 0:
-            print(f"Max Score {generation}: {max(scores)}")
+            print(f"Max Score {generation}: {max_score}")
             run = False
             break
+        elif max(scores) > max_score:
+            max_score = max(scores)
     #pygame.quit()
 
 def run(config_path):
@@ -152,13 +154,13 @@ def run(config_path):
         config_path)
 
     #p = neat.Population(config)
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-103')
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-99')
     p.add_reporter(neat.StdOutReporter(True))
     p.add_reporter(neat.Checkpointer(10))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
 
-    winner = p.run(main, 3)
+    winner = p.run(main, 1000)
     print(f"\nBest genome:\n{winner}")
     with open("winner.data", "wb") as data_update:
             pickle.dump(winner, data_update)
